@@ -1,0 +1,22 @@
+{
+  "_meta": {
+    "description": "Canonical role → folder mapping. Hand-edit to add/move folders or roles. .org/sync_org.py regenerates ORG.md from this file + the filesystem.",
+    "exclude_dirs": [
+      ".git",
+      ".org",
+      ".claude",
+      "memory",
+      "node_modules",
+      "venv",
+      ".venv",
+      "__pycache__",
+      ".DS_Store"
+    ]
+  },
+  "roles": {
+    "dev": {
+      "desc": "Engineering: code, tools, services, automation",
+      "folders": []
+    }
+  }
+}

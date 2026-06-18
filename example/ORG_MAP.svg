@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="684" viewBox="0 0 1280 684" font-family="ui-sans-serif, -apple-system, 'Segoe UI', Inter, Roboto, Helvetica, Arial, sans-serif">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F6F4EF"/><stop offset="1" stop-color="#EFECE4"/></linearGradient></defs>
+<rect width="1280" height="684" fill="url(#bg)"/>
+<text x="72" y="72" font-size="13" letter-spacing="3" fill="#8C8676" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace">ORG MEMORY MAP</text>
+<text x="72" y="116" font-size="40" font-weight="600" fill="#1B1A17" font-family="'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif">example</text>
+<text x="72" y="150" font-size="18" font-weight="700" fill="#1E6B4F" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace">4</text>
+<text x="89" y="150" font-size="14" fill="#8C8676">roles</text>
+<text x="139" y="150" font-size="14" fill="#B7B1A3">·</text>
+<text x="155" y="150" font-size="18" font-weight="700" fill="#1E6B4F" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace">5</text>
+<text x="172" y="150" font-size="14" fill="#8C8676">projects</text>
+<text x="246" y="150" font-size="14" fill="#B7B1A3">·</text>
+<text x="262" y="150" font-size="18" font-weight="700" fill="#1E6B4F" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace">108</text>
+<text x="301" y="150" font-size="14" fill="#8C8676">lessons</text>
+<text x="367" y="150" font-size="14" fill="#B7B1A3">·</text>
+<text x="383" y="150" font-size="18" font-weight="700" fill="#1E6B4F" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace">71%</text>
+<text x="422" y="150" font-size="14" fill="#8C8676">leaner / session</text>
+<rect x="410" y="188" width="460" height="66" rx="14" fill="#FFFFFF" stroke="#E0DBD0"/>
+<polygon points="444.0,208.0 455.3,214.5 455.3,227.5 444.0,234.0 432.7,227.5 432.7,214.5" fill="none" stroke="#1E6B4F" stroke-width="2.0"/>
+<text x="470" y="216" font-size="16" font-weight="600" fill="#1B1A17">Global memory</text>
+<text x="470" y="236" font-size="12.5" fill="#8C8676" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace">CLAUDE.md · ~2k · loads every session</text>
+<line x1="640" y1="254" x2="640" y2="300" stroke="#D8D3C7" stroke-width="1.25"/>
+<line x1="261" y1="300" x2="1018" y2="300" stroke="#D8D3C7" stroke-width="1.25"/>
+<line x1="261" y1="300" x2="261" y2="340" stroke="#D8D3C7" stroke-width="1.25"/>
+<rect x="86" y="340" width="350" height="96" rx="13" fill="#FFFFFF" stroke="#E0DBD0"/>
+<rect x="86" y="340" width="4" height="96" rx="2" fill="#B7B1A3"/>
+<text x="106" y="372" font-size="18" font-weight="600" fill="#1B1A17">engineering</text>
+<text x="106" y="392" font-size="12" fill="#8C8676">Backend services, internal tooling, and cli…</text>
+<rect x="106" y="406" width="310" height="5" rx="2.5" fill="#EFECE4"/>
+<rect x="106" y="406" width="207" height="5" rx="2.5" fill="#1E6B4F"/>
+<text x="106" y="428" font-size="11" fill="#B7B1A3" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace">~12k brain · 22 lessons</text>
+<line x1="640" y1="300" x2="640" y2="340" stroke="#D8D3C7" stroke-width="1.25"/>
+<rect x="465" y="340" width="350" height="96" rx="13" fill="#FFFFFF" stroke="#E0DBD0"/>
+<rect x="465" y="340" width="4" height="96" rx="2" fill="#B7B1A3"/>
+<text x="485" y="372" font-size="18" font-weight="600" fill="#1B1A17">data-science</text>
+<text x="485" y="392" font-size="12" fill="#8C8676">ML models, experiments, feature engineering…</text>
+<rect x="485" y="406" width="310" height="5" rx="2.5" fill="#EFECE4"/>
+<rect x="485" y="406" width="310" height="5" rx="2.5" fill="#1E6B4F"/>
+<text x="485" y="428" font-size="11" fill="#B7B1A3" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace">~18k brain · 47 lessons</text>
+<line x1="1018" y1="300" x2="1018" y2="340" stroke="#D8D3C7" stroke-width="1.25"/>
+<rect x="843" y="340" width="350" height="96" rx="13" fill="#FFFFFF" stroke="#E0DBD0"/>
+<rect x="843" y="340" width="4" height="96" rx="2" fill="#B7B1A3"/>
+<text x="863" y="372" font-size="18" font-weight="600" fill="#1B1A17">design</text>
+<text x="863" y="392" font-size="12" fill="#8C8676">Pitch decks, client-facing PDF reports, and…</text>
+<rect x="863" y="406" width="310" height="5" rx="2.5" fill="#EFECE4"/>
+<rect x="863" y="406" width="159" height="5" rx="2.5" fill="#1E6B4F"/>
+<text x="863" y="428" font-size="11" fill="#B7B1A3" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace">~9k brain · 28 lessons</text>
+<rect x="86" y="492" width="350" height="96" rx="13" fill="#FFFFFF" stroke="#E0DBD0"/>
+<rect x="86" y="492" width="4" height="96" rx="2" fill="#B7B1A3"/>
+<text x="106" y="524" font-size="18" font-weight="600" fill="#1B1A17">growth</text>
+<text x="106" y="544" font-size="12" fill="#8C8676">GTM assets, partner one-pagers, and audienc…</text>
+<rect x="106" y="558" width="310" height="5" rx="2.5" fill="#EFECE4"/>
+<rect x="106" y="558" width="66" height="5" rx="2.5" fill="#1E6B4F"/>
+<text x="106" y="580" font-size="11" fill="#B7B1A3" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace">~3k brain · 11 lessons</text>
+<line x1="72" y1="624" x2="1208" y2="624" stroke="#D8D3C7" stroke-width="1"/>
+<polygon points="83.0,631.0 90.8,635.5 90.8,644.5 83.0,649.0 75.2,644.5 75.2,635.5" fill="none" stroke="#1E6B4F" stroke-width="1.6"/>
+<text x="100" y="644" font-size="13.5" font-weight="600" fill="#1B1A17">made with orgkit</text>
+<text x="1208" y="644" font-size="12.5" fill="#8C8676" text-anchor="end" font-family="ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, monospace">github.com/hdk10/orgkit</text>
+</svg>

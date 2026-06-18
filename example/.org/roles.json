@@ -1,0 +1,47 @@
+{
+  "_meta": {
+    "description": "Canonical role -> folder mapping for this org. Hand-edit to add/move folders or roles. sync_org.py regenerates ORG.md.",
+    "exclude_dirs": [
+      ".claude",
+      ".git",
+      ".org",
+      "memory"
+    ]
+  },
+  "roles": {
+    "engineering": {
+      "desc": "Backend services, internal tooling, and client-facing integrations",
+      "folders": [
+        "api-service",
+        "admin-dashboard",
+        "data-pipeline",
+        "integrations"
+      ]
+    },
+    "data-science": {
+      "desc": "ML models, experiments, feature engineering, and evaluation tooling",
+      "folders": [
+        "churn-model",
+        "feature-catalog",
+        "fraud-experiments",
+        "model-skills"
+      ]
+    },
+    "design": {
+      "desc": "Pitch decks, client-facing PDF reports, and the document-generation skill",
+      "folders": [
+        "pitch-deck",
+        "report-generator",
+        "brand-assets"
+      ]
+    },
+    "growth": {
+      "desc": "GTM assets, partner one-pagers, and audience tooling",
+      "folders": [
+        "partner-onepagers",
+        "audience-uploader",
+        "content-calendar"
+      ]
+    }
+  }
+}

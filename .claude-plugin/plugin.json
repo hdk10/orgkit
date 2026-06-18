@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
+  "name": "orgkit",
+  "displayName": "orgkit",
+  "version": "0.1.0",
+  "description": "Turn a Claude Code repo into a self-organizing org: per-role memory brains auto-injected at session start, inline lessons auto-promoted, and a live ORG.md. Ships slash commands + lifecycle hooks plus a one-command onboarding flow.",
+  "author": {
+    "name": "orgkit"
+  },
+  "homepage": "https://github.com/hdk10/orgkit",
+  "repository": "https://github.com/hdk10/orgkit",
+  "license": "MIT",
+  "keywords": [
+    "memory",
+    "org",
+    "roles",
+    "knowledge-management",
+    "session-context",
+    "hooks"
+  ],
+  "hooks": "./hooks/hooks.json"
+}

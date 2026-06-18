@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "orgkit",
+  "owner": {
+    "name": "Hardik Katyarmal",
+    "url": "https://github.com/hdk10"
+  },
+  "description": "orgkit — a self-maintaining memory system for Claude Code, organized like an org chart.",
+  "plugins": [
+    {
+      "name": "orgkit",
+      "source": "./",
+      "description": "Three-level repo memory (global / role / project) auto-loaded per session, captured from your work and conversation, and periodically reconciled. Intelligent onboarding, slash commands, and lifecycle hooks. No API key.",
+      "category": "productivity",
+      "keywords": [
+        "memory",
+        "org",
+        "roles",
+        "knowledge-management"
+      ],
+      "license": "MIT"
+    }
+  ]
+}

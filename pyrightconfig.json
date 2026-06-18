@@ -1,0 +1,5 @@
+{
+  "//": "orgkit/ is a package; setup.py adds the repo root to sys.path at runtime so `import orgkit.X` resolves. This tells Pyright the same.",
+  "extraPaths": ["."],
+  "reportMissingImports": "none"
+}

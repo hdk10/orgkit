@@ -1,0 +1,77 @@
+# {{NAME}}'s Workspace
+
+_Global brain — injected into every Claude Code session. Keep it lean: only things true across ALL roles belong here. Role-specific knowledge lives in `‹role›/memory/ROLE.md`._
+
+---
+
+## Who I am
+
+**Name:** {{NAME}}
+**Role / title:** {{TITLE}}
+**Company / project:** {{COMPANY}}
+**Based in:** {{LOCATION}}
+
+<!-- 2–3 sentences: professional context, what kind of operator you are. -->
+{{BIO}}
+
+---
+
+## What I'm building
+
+<!-- The one paragraph that captures your current north star. What are you trying to get done this year? -->
+{{WHAT}}
+
+### Active fronts
+
+<!-- The 3–5 things actually getting worked on right now. Keep this list short and honest. -->
+- {{FRONT_1}}
+- {{FRONT_2}}
+- {{FRONT_3}}
+
+---
+
+## How I think / operating principles
+
+<!-- The mental models and defaults Claude should know about you. These shape HOW work gets done. -->
+<!-- Keep to 5–8 bullets — quality over quantity. Delete the examples and add your own. -->
+
+- **Bias to action over analysis.** Ship something, learn, iterate. Don't plan forever.
+- **Narrow ask → narrow output → stop.** Don't over-execute. One thing at a time.
+- **Show your work briefly.** Quick note on approach before diving in, but don't narrate every step.
+- **No lorem ipsum.** Templates should be genuinely useful starting points, not filler.
+
+---
+
+## Cross-cutting rules
+
+<!-- Things that apply to every session, every role. Format, tools, workflow hard limits. -->
+<!-- Examples below — replace with your own. -->
+
+- Ask before creating new files or folders; always say WHERE something will land before doing it.
+- Never commit or push without explicit approval.
+- All new projects go under a role folder, never at repo root — ask which role if unclear.
+- Open files in {{EDITOR}} when surfacing them to me.
+- Use tables/bullets for structured output; no walls of text.
+- When asking me questions, use the AskUserQuestion tool — never plain text questions.
+
+---
+
+## The 3-level memory system
+
+This workspace uses a layered memory architecture. Understanding it helps Claude help you better.
+
+| Level | File | Scope | When it loads |
+|---|---|---|---|
+| Global | `CLAUDE.md` (this file) | Every session | Always |
+| Role | `‹role›/memory/ROLE.md` | Within a role | SessionStart hook, when cwd is inside `‹role›/` |
+| Project | `‹role›/‹project›/memory/PROJECT.md` | Within a project | You read it manually or it's referenced by ROLE.md |
+
+**How to feed the system:**
+- Tag insights inline in any `memory/PROJECT.md` using `[LESSON]:`, `[PATTERN]:`, `[GOTCHA]:`, `[TOOL]:`.
+- The Stop hook scrapes these and queues them to `‹role›/memory/_pending.md`.
+- Run `/role-promote ‹role›` to auto-reconcile the role brain (or it fires automatically when >7 days stale with pending activity).
+
+**Org commands:**
+- `/org-status` — see all roles, staleness, pending queues at a glance.
+- `/new-project` — scaffold a new project under a role.
+- `/role-promote ‹role›` — reconcile a role brain.

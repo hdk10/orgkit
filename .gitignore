@@ -1,0 +1,9 @@
+__pycache__/
+*.py[cod]
+.DS_Store
+*.bak.*
+ORG.md.bak
+*/memory/ROLE.md.bak
+
+# internal dev notes (not part of the shipped kit)
+memory/

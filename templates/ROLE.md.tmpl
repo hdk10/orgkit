@@ -1,0 +1,124 @@
+# {{ROLE_NAME}} Role Memory
+
+_Auto-injected into Claude Code sessions inside `{{ROLE_NAME}}/`. Last bootstrapped: {{DATE}}. Last reconciled: {{DATE}}._
+
+---
+
+## Mission
+
+<!-- What is this role for? Who is the "customer" of this role's output? What does done look like? -->
+<!-- 1–3 sentences. Be concrete — "ship client-facing ML models" not "do data stuff". -->
+{{MISSION}}
+
+---
+
+## Projects in this role
+
+<!-- This table is maintained automatically by /new-project and sync_org.py. -->
+<!-- Add a one-line status note manually as projects progress. -->
+
+| Project | What it is | Status |
+|---|---|---|
+| _(none yet — run `/new-project` to scaffold one)_ | | |
+
+---
+
+## Best practices
+
+<!-- Established conventions that work. Things to keep doing. Must be concrete and actionable. -->
+<!-- Source: [LESSON] tags from project memory files, promoted here by /role-promote. -->
+
+- _No lessons yet. Tag insights with `[LESSON]: text` in any `memory/PROJECT.md` to start building this._
+
+---
+
+## Patterns
+
+<!-- Reusable approaches discovered in this role. "We always do it this way because..." -->
+<!-- Source: [PATTERN] tags. -->
+
+- _No patterns yet._
+
+---
+
+## Anti-patterns
+
+<!-- What NOT to do, with WHY. Things tried that failed or caused pain. -->
+<!-- Format: `[project] — what we tried — why it failed / what to do instead` -->
+
+- _No anti-patterns documented yet._
+
+---
+
+## Gotchas
+
+<!-- The subtle, non-obvious things that bit us. The "I wish someone had told me" list. -->
+<!-- Format: `[project] — gotcha — fix or workaround` -->
+<!-- Source: [GOTCHA] tags. -->
+
+- _No gotchas yet._
+
+---
+
+## Tools / stacks
+
+<!-- Libraries, frameworks, CLIs, services used across this role's projects. -->
+<!-- Group by purpose. Be specific — what version, what it's used for, any quirks. -->
+<!-- Source: [TOOL] tags. -->
+
+_No tools documented yet._
+
+---
+
+## Vocabulary / glossary
+
+<!-- Domain terms used across projects in this role. Avoid re-defining in each project. -->
+<!-- Format: `**Term** — definition. Context: where/how it's used.` -->
+
+- _No glossary terms yet._
+
+---
+
+## Open questions
+
+<!-- Recurring unresolved questions. Things not yet figured out. Decisions deferred. -->
+<!-- Remove an entry when it's resolved — add the resolution to Best practices or Patterns. -->
+
+- _No open questions yet._
+
+---
+
+## Index of where everything lives
+
+<!-- The "find it without spelunking" section. If you need X, go here. -->
+<!-- Onboarding rule: read this section first before asking Claude to search the repo. -->
+
+| If you need to... | Look at | Why |
+|---|---|---|
+| _(example) build a scraper with auth_ | _`dev/tweet-scraper/scrape.py`_ | _Reference impl: cookies + GraphQL + SQLite manifest_ |
+| _(add your own rows as projects mature)_ | | |
+
+**Key files across projects in this role:**
+
+<!-- List the most important files by project. Remove stale entries when projects are archived. -->
+
+- _(none yet)_
+
+---
+
+## How to contribute
+
+**Inline tagging** (the easiest path): in any `‹role›/‹project›/memory/PROJECT.md`, write tags like:
+
+```
+[LESSON]: something that worked well — be specific, one line
+[PATTERN]: reusable approach we discovered here
+[GOTCHA]: subtle thing that bit us — include the fix
+[TOOL]: library / CLI / service that's genuinely useful — include why
+```
+
+The **Stop hook** scrapes these automatically after each session and appends them to `{{ROLE_NAME}}/memory/_pending.md`.
+
+**Promoting to this ROLE.md**: run `/role-promote {{ROLE_NAME}}` to auto-reconcile (a sonnet subagent reads all pending content, dedupes, declutters, integrates). This fires automatically when the brain is >7 days stale with pending activity.
+
+**Capturing before promoting**: run `/capture {{ROLE_NAME}}` to scrape tagged insights from changed files into `_pending.md`, then `/role-promote {{ROLE_NAME}}` to reconcile them into here.
