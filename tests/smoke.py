@@ -299,6 +299,25 @@ def t_migrate_scaffolds_brains():
           "migrate: stamps .last_promote (no day-one nag)")
 
 
+
+def t_scrape_skips_nested_git():
+    """role_digest must NOT scrape tags from a nested git repo (vendored/standalone)."""
+    home, env = sandbox_env()
+    repo = new_repo()
+    py(SETUP, "--target", repo, "--fresh", "--roles", "eng:Build", "--yes", env=env)
+    import time as _t
+    # a nested git repo under the role with a doc that contains a [GOTCHA] example
+    nested = repo / "eng" / "vendored-tool"
+    (nested / ".git").mkdir(parents=True)
+    (nested / "README.md").write_text("Example: write [GOTCHA]: do not scrape me\n")
+    (repo / "eng" / "memory" / ".last_digest").write_text(json.dumps({"ts": _t.time() - 99999}))
+    env2 = dict(env); env2["CLAUDE_PROJECT_DIR"] = str(repo)
+    py(repo / ".org" / "role_digest.py", "scrape", env=env2)
+    role_md = (repo / "eng" / "memory" / "ROLE.md").read_text()
+    check("do not scrape me" not in role_md,
+          "role_digest skips nested git repos (no vendored-doc pollution)")
+
+
 def t_install_cron_honest():
     sys.path.insert(0, str(ORGKIT))
     src = (ORGKIT / "install_cron.py").read_text()
@@ -333,6 +352,7 @@ def main() -> int:
     t_no_fresh_nag()
     t_migrate_classify()
     t_migrate_scaffolds_brains()
+    t_scrape_skips_nested_git()
     t_install_cron_honest()
     t_uninstall(repo, env)
 

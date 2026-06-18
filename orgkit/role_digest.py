@@ -89,7 +89,12 @@ SECTION_MAP: dict[str, str] = {
 def _files_modified_since(role_dir: Path, since_ts: float):
     """Yield files inside role_dir with mtime > since_ts."""
     for dirpath, dirnames, filenames in os.walk(role_dir):
-        dirnames[:] = [d for d in dirnames if d not in EXCLUDE_DIRS]
+        # Skip excluded dirs AND nested git repos (vendored/standalone projects
+        # like a cloned tool — their doc examples must not be scraped as lessons).
+        dirnames[:] = [
+            d for d in dirnames
+            if d not in EXCLUDE_DIRS and not (Path(dirpath) / d / ".git").exists()
+        ]
         for fn in filenames:
             ext = os.path.splitext(fn)[1].lower()
             if ext not in INCLUDE_EXTS:
