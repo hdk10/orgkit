@@ -175,19 +175,132 @@ def _append_to_pending(pending_md: Path, line: str) -> None:
         fh.write(f"- [{ts}] {line}\n")
 
 
+def _pending_has_transcript(pending_md: Path, transcript_path: str) -> bool:
+    """True if this transcript path is already queued in _pending.md.
+
+    The Stop hook fires on EVERY assistant turn, so without this guard a long
+    session would append the same transcript pointer dozens of times. Dedupe by
+    the path string — one pointer per transcript per role is all /capture needs.
+    """
+    if not pending_md.is_file():
+        return False
+    try:
+        return transcript_path in pending_md.read_text(encoding="utf-8")
+    except Exception:
+        return False
+
+
+def _assistant_text_from_transcript(transcript_path: str) -> str:
+    """Concatenate the text of all assistant turns in a session transcript.
+
+    The transcript is newline-delimited JSON; assistant rows carry
+    `message.content`, which is either a string or a list of blocks where text
+    blocks have a `text` field. We only need assistant text — that's where the
+    live-capture directive tells the model to emit its [TAG]: lines.
+    """
+    p = Path(transcript_path)
+    if not p.is_file():
+        return ""
+    chunks: list[str] = []
+    try:
+        for raw in p.read_text(encoding="utf-8", errors="replace").splitlines():
+            raw = raw.strip()
+            if not raw:
+                continue
+            try:
+                row = json.loads(raw)
+            except Exception:
+                continue
+            if not isinstance(row, dict) or row.get("type") != "assistant":
+                continue
+            msg = row.get("message") or {}
+            content = msg.get("content")
+            if isinstance(content, str):
+                chunks.append(content)
+            elif isinstance(content, list):
+                for block in content:
+                    if isinstance(block, dict) and isinstance(block.get("text"), str):
+                        chunks.append(block["text"])
+    except OSError:
+        return ""
+    return "\n".join(chunks)
+
+
+def _scrape_transcript_to_pending(transcript_path: str, pend_md: Path) -> int:
+    """Harvest [TAG]: lines the model emitted in its replies into _pending.md.
+
+    This is the consumer side of the live-capture directive (design B): the model
+    just *says* the tagged line; this deterministically captures it. Deduped by
+    bullet text so the per-turn Stop hook re-scanning the whole transcript never
+    creates duplicates. Returns the count of new bullets queued.
+    """
+    text = _assistant_text_from_transcript(transcript_path)
+    if not text:
+        return 0
+    existing = ""
+    if pend_md.is_file():
+        try:
+            existing = pend_md.read_text(encoding="utf-8")
+        except Exception:
+            existing = ""
+    new = 0
+    seen_this_run: set[str] = set()
+    for m in TAG_RE.finditer(text):
+        tag = m.group(1)
+        body = m.group(2).strip()
+        if not body:
+            continue
+        bullet = f"[{tag}]: {body} _(from session conversation)_"
+        if bullet in seen_this_run or bullet in existing:
+            continue
+        seen_this_run.add(bullet)
+        _append_to_pending(pend_md, bullet)
+        new += 1
+    return new
+
+
+def _active_role(repo_root: Path, cwd: str | None, roles: dict) -> str | None:
+    """Resolve the role the session is operating in, from its cwd.
+
+    Mirrors role_inject.py's SessionStart logic: the first path component under
+    the repo root that names a role. Returns None when the session started at
+    the repo root or outside any role — there's no single role to attribute a
+    zero-edit conversation to in that case.
+    """
+    if not cwd:
+        return None
+    try:
+        parts = Path(cwd).resolve().relative_to(repo_root.resolve()).parts
+    except (ValueError, OSError):
+        return None
+    if parts and parts[0] in roles:
+        return parts[0]
+    return None
+
+
 # ---------------------------------------------------------------------------
 # Main scrape logic
 # ---------------------------------------------------------------------------
 
-def tag_scrape_all(repo_root: Path, transcript_path: str | None = None) -> None:
+def tag_scrape_all(
+    repo_root: Path,
+    transcript_path: str | None = None,
+    cwd: str | None = None,
+) -> None:
     """Tag-scrape all roles.  Runs in well under 1 second for typical repos.
 
-    If `transcript_path` is given (the Stop hook passes it on stdin), each role
-    that changed this session also gets a pointer to the session transcript
-    queued in `_pending.md` — so `/capture` and `/role-promote` can mine the
-    actual conversation (decisions, trade-offs, gotchas), not just file diffs.
+    If `transcript_path` is given (the Stop hook passes it on stdin), a pointer
+    to the session transcript is queued in `_pending.md` so `/capture` and
+    `/role-promote` can mine the actual conversation (decisions, trade-offs,
+    gotchas), not just file diffs. The pointer is queued for:
+      - every role whose files changed this session, AND
+      - the *active* role (resolved from `cwd`) even when ZERO files changed —
+        this is what lets a discussion-only session (we corrected Claude, chose
+        an approach, edited nothing) still leave its conversation for capture.
+    Deduped by transcript path, so the per-turn Stop hook never floods the queue.
     """
     roles = load_roles(repo_root)
+    active_role = _active_role(repo_root, cwd, roles)
     summary: list[tuple[str, int, int]] = []
 
     for role in sorted(roles.keys()):
@@ -235,19 +348,36 @@ def tag_scrape_all(repo_root: Path, transcript_path: str | None = None) -> None:
                 f"{role}: {len(files_changed)} files changed "
                 f"({file_list}{more}) — run /capture then /role-promote",
             )
-            if transcript_path:
+
+        # Queue the transcript pointer when files changed in this role OR this is
+        # the active role with no edits (discussion-only session). Deduped by path
+        # so the per-turn Stop hook leaves at most one pointer per transcript.
+        queued_transcript = False
+        if transcript_path and (files_changed or role == active_role):
+            if not _pending_has_transcript(pend_md, transcript_path):
                 _append_to_pending(
                     pend_md,
                     f"{role}: session transcript at {transcript_path} "
                     f"— /capture to mine the conversation (decisions, gotchas, why)",
                 )
-            summary.append((role, len(files_changed), new_tags))
+                queued_transcript = True
+
+        # Live capture (design B): harvest [TAG]: lines the model emitted in its
+        # replies this session into _pending.md. Only for the active role's own
+        # transcript; deduped so re-scanning every turn never duplicates.
+        live_tags = 0
+        if transcript_path and role == active_role:
+            live_tags = _scrape_transcript_to_pending(transcript_path, pend_md)
+
+        if files_changed or queued_transcript or live_tags:
+            summary.append((role, len(files_changed), new_tags + live_tags))
 
         write_marker(marker)
 
     for role, n_files, n_tags in summary:
         print(
-            f"[role_digest] {role}: {n_files} files changed, {n_tags} tags promoted to ROLE.md",
+            f"[role_digest] {role}: {n_files} files changed, {n_tags} tags captured "
+            f"(file tags→ROLE.md, live reply tags→_pending.md)",
             file=sys.stderr,
         )
 
@@ -271,14 +401,18 @@ def main() -> int:
         # Best-effort: read it if present so we can point /capture at the
         # conversation. Never block or crash when run manually (no stdin).
         transcript_path = None
+        cwd = None
         try:
             if not sys.stdin.isatty():
                 payload = json.load(sys.stdin)
                 if isinstance(payload, dict):
                     transcript_path = payload.get("transcript_path")
+                    cwd = payload.get("cwd")
         except Exception:
             transcript_path = None
-        tag_scrape_all(repo_root, transcript_path=transcript_path)
+            cwd = None
+        cwd = cwd or os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd()
+        tag_scrape_all(repo_root, transcript_path=transcript_path, cwd=cwd)
     else:
         print(f"Unknown mode: {mode}", file=sys.stderr)
         return 1

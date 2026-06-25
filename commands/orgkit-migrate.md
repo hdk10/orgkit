@@ -153,6 +153,40 @@ If **any** references are unresolved or dangling, say so explicitly — never cl
 
 ---
 
+## Step 7 — Offer scheduled batch capture (optional)
+
+Unlike a fresh `/orgkit-init`, a migrated repo is one you've **already worked in**,
+so `~/.claude` has real session history for it — the cadence analysis is
+meaningful right now. (Migration keeps the same repo root, so transcripts from
+before the move still count.) This is the natural moment to offer the periodic
+**batch** capture that backs up always-on live capture.
+
+1. Run the read-only usage analysis (writes nothing):
+   ```bash
+   python3 .org/cadence.py
+   ```
+   It recommends a **cadence** (every N days) and up to **2 cron slots**, chosen by
+   awake-probability (laptop on ≥40% of active days) and ordered by lowest token
+   usage.
+
+2. Show the recommendation and the trade-off:
+   - **Opt-out cost:** without batch capture, anything live capture missed is
+     recoverable only by running `/capture` manually, and is lost when the
+     transcript is cleaned (~30 days).
+   - It runs on **Sonnet** and **your subscription token only** (never an API key).
+
+3. If the user wants it, hand off to the dedicated flow — **do not install here.**
+   `/orgkit-cadence` runs the auth probe (`claude setup-token` →
+   `CLAUDE_CODE_OAUTH_TOKEN` in `.org/.capture_env`) and installs the cron with the
+   recommended cadence + slots. Just tell them:
+   > Run `/orgkit-cadence` to set up scheduled capture (needs a one-time
+   > `claude setup-token`).
+
+   This keeps migration focused on moving files; crontab + credentials remain a
+   separate, explicit opt-in.
+
+---
+
 ## Constraints
 
 - **Never** claim all references are fixed without completing the re-scan in Step 5.

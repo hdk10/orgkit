@@ -203,6 +203,35 @@ Next steps to suggest:
 - If folders still live at the repo root and need moving → run `/orgkit-migrate` to move + fix refs safely.
 - Tag insights in files with `[LESSON]:` / `[PATTERN]:` / `[GOTCHA]:` / `[TOOL]:` — the Stop hook auto-promotes them to the role brain.
 
+## Step 8 — Offer scheduled batch capture (optional)
+
+Live capture (the in-session directive) is always on. Offer the user the periodic
+**batch** safety net that sweeps any sessions live capture missed.
+
+1. Run the read-only usage analysis (writes nothing):
+   ```bash
+   python3 .org/cadence.py
+   ```
+   It recommends a **cadence** (every N days) and up to **2 cron slots**, chosen by
+   awake-probability (hours the laptop is on ≥40% of active days) and ordered by
+   lowest token usage.
+
+2. Show the recommendation and the trade-off:
+   - **Opt-out cost:** without batch capture, anything live capture missed is
+     recoverable only by running `/capture` manually, and is lost when the
+     transcript is cleaned (~30 days).
+   - It runs on **Sonnet** and **your subscription token only** (never an API key).
+
+3. If the user wants it, hand off to the dedicated flow — **do not install here.**
+   `/orgkit-cadence` runs the auth probe (`claude setup-token` →
+   `CLAUDE_CODE_OAUTH_TOKEN` in `.org/.capture_env`) and installs the cron with the
+   recommended cadence + slots. Just tell them:
+   > Run `/orgkit-cadence` to set up scheduled capture (needs a one-time
+   > `claude setup-token`).
+
+   This keeps onboarding non-interactive and never touches crontab or credentials
+   without an explicit, separate opt-in.
+
 ---
 
 ## Constraints and guardrails

@@ -88,8 +88,9 @@ Nine slash commands, available inside any Claude Code session after install. Ins
 | `/orgkit-analyze` | Read-only preview: maps folders to roles, estimates token savings, changes nothing |
 | `/orgkit-migrate` | Moves folders under roles, fixes path refs, model fixes imports regex can't, writes `MIGRATION.md` |
 | `/orgkit-doctor` | Diagnoses dangling hooks, malformed `roles.json`, drift between config and filesystem |
-| `/capture ‹role›` | Distills lessons from this session's diffs into the role's queue |
+| `/capture ‹role›` | Distills lessons from this session's diffs + conversation into the role's queue (runs on Sonnet) |
 | `/role-promote ‹role›` | Reconciles a role brain: merge, de-dupe, declutter, rebuild index. No API key needed |
+| `/orgkit-cadence` | Analyzes your real usage and recommends a cadence + time slots for optional scheduled batch capture |
 | `/new-project` | Scaffolds a new project under the right role with its own `PROJECT.md` |
 | `/org-status` | Shows roles, projects, and what's queued for reconcile |
 | `/org-map` | Renders a shareable org-chart image of your setup |
@@ -103,7 +104,7 @@ flowchart LR
   S(["▶ session start"]) --> I["inject<br/>global + current role"]
   I --> W["you work"]
   W --> T(["⏹ session stop"])
-  T --> C["capture<br/>tags → ROLE.md<br/>+ queue + transcript"]
+  T --> C["capture<br/>file tags → ROLE.md<br/>live reply tags → queue"]
   C -.->|next session| S
   T --> P["/role-promote<br/>merge · de-dupe · declutter<br/>rebuild index"]
   P -.->|sharper brain| S
@@ -111,9 +112,10 @@ flowchart LR
   class S,T a
 ```
 
-- **Start** → hook injects global + your current role (only the one you're in).
-- **Stop** → hook scrapes inline `[LESSON]/[GOTCHA]/[PATTERN]/[TOOL]` tags into `ROLE.md`, queues a stub + a transcript pointer.
+- **Start** → hook injects global + your current role (only the one you're in), plus a live-capture directive: as you work, just *say* a `[LESSON]/[GOTCHA]/[PATTERN]/[TOOL]` line in your reply when something durable surfaces (especially when the user corrects you).
+- **Stop** → hook harvests those tagged lines from the session transcript into the role's queue (`_pending.md`), scrapes any inline tags written into changed *files* straight into `ROLE.md`, and queues a transcript pointer. The model never has to write a memory file — the hook does it deterministically.
 - **`/role-promote`** → reconciles the brain (merge, de-dupe, declutter, rebuild index) from diffs **and the session conversation**. Shrink-guard + `.bak` protect it. Nudged when a role goes stale; not hands-free.
+- **Scheduled batch capture (optional)** → `/orgkit-cadence` analyzes your usage and installs a cron that runs `/capture` for stale-but-pending roles on a cadence — on Sonnet, using your subscription token (never an API key), at most once per period. A safety net for anything live capture missed.
 
 <details>
 <summary><b>Migrating an existing messy repo</b></summary>
@@ -155,7 +157,7 @@ Full walkthrough: [docs/MIGRATION.md](docs/MIGRATION.md)
 No. `/role-promote` runs inside your Claude Code session using the session model.
 
 **Does it work on Windows?**
-Yes — Python 3, stdlib only. Use PowerShell. `--install-cron` is Unix-only; the start/stop hooks still keep memory fresh on Windows.
+Yes — Python 3, stdlib only. Use PowerShell. Scheduled batch capture (`/orgkit-cadence`) installs a Unix cron, so it's macOS/Linux-only; the start/stop hooks and live capture still keep memory fresh on Windows.
 
 **Will it touch my files destructively?**
 No. Migration dry-runs first, never deletes, keeps a `MIGRATION.md` map. Reconcile keeps a `.bak` and a shrink-guard. `settings.json` is backed up before every change.
@@ -166,8 +168,8 @@ In your user-global `~/.claude/settings.json` (project-level hooks have a known 
 **Can I add more roles later?**
 Yes. Just run `/orgkit-init` again or add a role manually to `roles.json` and run `python3 setup.py --sync`.
 
-**Can reconcile run headlessly on a schedule?**
-Not fully. `--install-cron` writes `.reconcile_due` markers for stale roles — your next interactive session picks them up. Headless model execution (`claude -p "/role-promote"`) doesn't support slash commands.
+**Can capture run headlessly on a schedule?**
+Yes — `/orgkit-cadence` installs a cron that runs `/capture` headlessly via `claude -p` (slash commands *do* work in print mode). It runs on **Sonnet**, authenticates with your **subscription token** (`claude setup-token` → `CLAUDE_CODE_OAUTH_TOKEN`, never an API key, so no separate bill), and a once-per-cadence guard means it captures at most once per period no matter how many time slots are scheduled. Reconcile (`/role-promote`) stays interactive — it's nudged at session start when a role goes stale, since it rewrites the brain and benefits from your presence.
 
 </details>
 

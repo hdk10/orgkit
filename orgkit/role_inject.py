@@ -141,6 +141,92 @@ def autofire_directive(role: str) -> str:
     )
 
 
+def _capture_authmark_path(repo_root: Path) -> Path:
+    return repo_root / ".org" / ".capture_auth_expired"
+
+
+def _capture_nag_path(repo_root: Path) -> Path:
+    return repo_root / ".org" / ".capture_auth_nag"
+
+
+def capture_auth_due(repo_root: Path) -> bool:
+    """True if scheduled capture hit an auth failure and we haven't nagged recently.
+
+    The cron batch script (install_cron.py) writes `.capture_auth_expired` when
+    its subscription token is missing/expired. We surface it at SessionStart so
+    the user actually finds out — but throttle to NAG_COOLDOWN_HOURS so it isn't
+    repeated every session.
+    """
+    if not _capture_authmark_path(repo_root).exists():
+        return False
+    last_nag = read_marker_ts(_capture_nag_path(repo_root))
+    if (time.time() - last_nag) < NAG_COOLDOWN_HOURS * 3600:
+        return False
+    return True
+
+
+def capture_auth_directive() -> str:
+    return (
+        "\n\n---\n\n"
+        "## Scheduled capture can't authenticate\n\n"
+        "Background batch capture failed to authenticate — the subscription token "
+        "(`CLAUDE_CODE_OAUTH_TOKEN`) is missing or expired, so scheduled capture "
+        "has stopped. Live in-session capture still works, but the periodic sweep "
+        "is down. To restore it: run `claude setup-token` (uses your subscription, "
+        "not an API key), then put the new token in `.org/.capture_env`. "
+        "Mention this to the user now so it gets fixed.\n"
+    )
+
+
+def live_capture_directive() -> str:
+    """Strong, always-on directive: emit tagged lessons in your REPLY as you work.
+
+    This is the primary capture path. The model only has to *say* the tagged line
+    in its answer — it does NOT write any file. The Stop hook (role_digest.py)
+    deterministically harvests those tagged lines from the session transcript and
+    appends them to `_pending.md`, so the capture itself can't be forgotten or
+    fumbled by a missed tool call. `/capture` and `/role-promote` remain the
+    backstop + reconciler. Injected once per session alongside ROLE.md.
+    """
+    return (
+        "\n\n---\n\n"
+        "## Capture lessons LIVE (just say the tag — the hook saves it)\n\n"
+        "You are the capture engine for this role. The instant something durable "
+        "surfaces in THIS conversation, **emit a tagged line in your reply** (plain "
+        "text, on its own line). You do NOT write any file — a Stop hook scrapes "
+        "these lines from the transcript into `_pending.md` automatically. Keep it "
+        "to one short line; don't make a production of it.\n\n"
+        "**Emit a tag immediately when ANY of these happen:**\n"
+        "- The user **corrects you** or rejects an approach — the strongest signal. "
+        "Record what was wrong and the right answer.\n"
+        "- The user **states a constraint, preference, or rule** (\"always X\", "
+        "\"never Y\", \"we do it this way\").\n"
+        "- You **hit a gotcha** and resolve it — something a future session would "
+        "trip on.\n"
+        "- You **choose a tool, library, or pattern for a concrete reason** — record "
+        "the choice and the why.\n"
+        "- A **non-obvious decision** gets made and you understand the rationale.\n\n"
+        "**Before emitting, the line must pass all four:**\n"
+        "1. **Specific & concrete** (a real command/path/number/rule — not "
+        "\"use good libraries\").\n"
+        "2. **Non-obvious** — a future session genuinely benefits.\n"
+        "3. **New** — not already substantively in the ROLE.md above.\n"
+        "4. **Traceable** — it came from this actual work, not general knowledge.\n\n"
+        "It is good to capture nothing in a turn. Three sharp lines beat ten vague "
+        "ones. Never fabricate to fill the queue.\n\n"
+        "**Format** — one tag per line, exactly these prefixes (the hook matches "
+        "them verbatim). Only emit the tag types that have new content:\n\n"
+        "```\n"
+        "[LESSON]: <concrete best practice / what the correction taught>\n"
+        "[GOTCHA]: <the subtle thing that bit you / was avoided>\n"
+        "[PATTERN]: <reusable approach + its reason>\n"
+        "[TOOL]: <library/CLI — what it does, any quirks>\n"
+        "```\n\n"
+        "Never edit ROLE.md or `_pending.md` yourself — just say the tagged line; "
+        "`/role-promote` reconciles the queue into the brain later.\n"
+    )
+
+
 # ---------------------------------------------------------------------------
 # Session state (per-session, idempotent within a session)
 # ---------------------------------------------------------------------------
@@ -191,8 +277,8 @@ def _read_role_md(repo_root: Path, role: str) -> str:
     return (
         f"# Role memory injected: {role}\n\n"
         f"_The session is operating inside `{role}/`. Below is `{role}/memory/ROLE.md`, "
-        f"the accumulated team knowledge for this role. Use it as context. "
-        f"Update via tagged `[LESSON]:`/`[PATTERN]:`/`[GOTCHA]:`/`[TOOL]:` lines._\n\n"
+        f"the accumulated team knowledge for this role. Use it as context; capture new "
+        f"insight live per the directive below._\n\n"
         "---\n\n"
         + body
     )
@@ -226,6 +312,7 @@ def _build_full_context(
         parts.append(global_ctx)
 
     parts.append(_read_role_md(repo_root, role))
+    parts.append(live_capture_directive())
 
     if project:
         proj_ctx = _read_project_md(repo_root, role, project)
@@ -352,6 +439,11 @@ def main() -> int:
             if reconcile_due(repo_root, role) or marker_fired:
                 ctx += autofire_directive(role)
                 mark_nagged(repo_root, role)
+
+            # Surface a dead scheduled-capture cron (expired subscription token).
+            if capture_auth_due(repo_root):
+                ctx += capture_auth_directive()
+                write_marker(_capture_nag_path(repo_root))
 
             _emit("SessionStart", ctx)
             return 0

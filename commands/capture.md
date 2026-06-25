@@ -5,6 +5,8 @@ argument-hint: [role]
 
 You are capturing lessons from recent work in the **$ARGUMENTS** role's projects. This is **model-driven** distillation — you read actual changed files and synthesise concrete, specific insights. No tag-hunting; no generic platitudes.
 
+> **Always run capture on Sonnet — never Opus/the best model.** Capture is a high-frequency distillation task; it must stay cheap. After validating the role (step 1), delegate the read + distill + write work (steps 2–6) to a **Sonnet subagent** (Task tool, `model: sonnet`). The main thread only validates inputs and relays the final report. If this command is itself invoked headless via `claude -p`, the caller already pins `--model claude-sonnet-4-6`, so just proceed.
+
 ## Why this exists
 
 The Stop hook (`role_digest.py`) only regex-scrapes pre-written `[LESSON]/[PATTERN]/[GOTCHA]/[TOOL]` tags. Nobody writes those tags consistently, so that fast-lane is usually empty. `/capture` is the real path: the model reads actual work output **and the session conversation** and distills lessons from both, then feeds them into `_pending.md` for `/role-promote` to reconcile.
@@ -44,7 +46,7 @@ The Stop hook (`role_digest.py`) only regex-scrapes pre-written `[LESSON]/[PATTE
    ```
    This emits the clean USER/ASSISTANT dialogue (tool-call noise stripped, token-bounded). Read it and look for the things a diff can never show: **decisions and their rationale, trade-offs weighed, approaches tried and abandoned, gotchas hit and how they were resolved, constraints the user stated.** This is usually the richest source of lessons.
 
-   > **Caveat:** transcript pointers in `_pending.md` only exist if `role_digest.py` is installed as a Stop hook AND files changed during the session that wrote those entries. If no pointers are found, skip step 2(d) silently, proceed with diffs/files alone, and note in your report: "No transcript pointers found — capturing from diffs and files only."
+   > **Caveat:** transcript pointers in `_pending.md` only exist if `role_digest.py` is installed as a Stop hook AND the session either changed files OR ran inside this role's folder (discussion-only sessions are captured too, attributed to the active role). If no pointers are found, skip step 2(d) silently, proceed with diffs/files alone, and note in your report: "No transcript pointers found — capturing from diffs and files only."
 
    If there are no changed files AND no transcript, report: `No recent work found in $ARGUMENTS/ — nothing to capture.` and stop.
 

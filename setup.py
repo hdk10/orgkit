@@ -14,8 +14,8 @@ Non-interactive (scriptable / testable):
   python3 setup.py --target <path> --fresh --roles "eng:Engineering,growth:Growth" --yes
   python3 setup.py --target <path> --fresh --roles-json '[{"name":"eng","desc":"Backend, frontend, and infra"}]' --yes
   python3 setup.py --target <path> --migrate --yes --role-map "src:eng,site:growth"
-  python3 setup.py --install-cron [--weekly]
-  python3 setup.py --target <path> --fresh --roles "a:desc" --yes --install-cron
+  python3 setup.py --target <path> --fresh --roles "a:desc" --yes
+  # (scheduled batch capture is opt-in/interactive: run /orgkit-cadence)
 
 Recovery / maintenance flags:
   --analyze         Read-only scan: propose org chart + token savings. Changes nothing.
@@ -34,8 +34,9 @@ All flags:
   --role-map STR    Comma-sep "folder:role" pairs (migrate mode, non-interactive)
   --yes             Skip all confirmation prompts
   --dry-run         Report only; make no changes (--rollback / --doctor)
-  --install-cron    Also install periodic reconcile job after setup
-  --weekly          Weekly cron schedule (default; only with --install-cron)
+  --install-cron    Deprecated. Prints a pointer to /orgkit-cadence, which sets
+                    up scheduled batch capture interactively (auth + cadence).
+  --weekly          Deprecated no-op (kept for backward-compat).
 """
 from __future__ import annotations
 
@@ -772,11 +773,18 @@ def main() -> int:
     sync_info = run_sync_org(target_root)
     run_render_plan(target_root)
 
-    # Optional: install cron
+    # Optional: scheduled batch capture.
+    # This is now an opt-in, INTERACTIVE flow — it needs a subscription token
+    # (`claude setup-token`), an auth probe, and a cadence/slot choice based on
+    # your real usage. setup.py can't do that non-interactively, so we point you
+    # at the command that can instead of silently doing the wrong thing.
     if args.install_cron:
-        from orgkit.install_cron import install as install_cron
-        print("\n[setup] installing periodic reconcile job...")
-        install_cron(target_root=target_root, weekly=args.weekly)
+        print(
+            "\n[setup] Scheduled batch capture is opt-in and interactive.\n"
+            "  Run  /orgkit-cadence  in a Claude Code session: it analyses your\n"
+            "  usage, recommends a cadence + awake-aware time slots, and installs\n"
+            "  the cron (Sonnet-only, subscription token, never an API key)."
+        )
 
     # Mark all done (current_idx = total = all ticked)
     prev = _print_checklist(phases, len(phases), prev)
